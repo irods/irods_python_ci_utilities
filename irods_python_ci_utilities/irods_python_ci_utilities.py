@@ -32,6 +32,7 @@ def subprocess_get_output(*args, **kwargs):
         del kwargs['check_rc']
     data = None
     if 'data' in kwargs:
+        kwargs['stdin'] = subprocess.PIPE
         data = kwargs['data']
         del kwargs['data']
     p = subprocess.Popen(*args, **kwargs)
