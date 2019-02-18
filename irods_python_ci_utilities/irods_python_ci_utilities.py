@@ -49,40 +49,31 @@ stderr: {4}
     return p.returncode, out, err
 
 def install_os_packages_apt(packages):
-    if packages:
-        subprocess_get_output(['sudo', 'apt-get', 'clean'], check_rc=True)
-        subprocess_get_output(['sudo', 'apt-get', 'update'], check_rc=True)
-        args = ['sudo', 'apt-get', 'install', '-y'] + list(packages)
-        subprocess_get_output(args, check_rc=True)
+    args = ['sudo', 'apt-get', 'install', '-y'] + list(packages)
+    subprocess_get_output(args, check_rc=True)
 
 def install_os_packages_yum(packages):
-    if packages:
-        args = ['sudo', 'yum', 'install', '-y'] + list(packages)
-        subprocess_get_output(args, check_rc=True)
+    args = ['sudo', 'yum', 'install', '-y'] + list(packages)
+    subprocess_get_output(args, check_rc=True)
 
 def install_os_packages_zypper(packages):
-    if packages:
-        args = ['sudo', 'zypper', '--non-interactive', 'install'] + list(packages)
-        subprocess_get_output(args, check_rc=True)
+    args = ['sudo', 'zypper', '--non-interactive', 'install'] + list(packages)
+    subprocess_get_output(args, check_rc=True)
 
 def install_os_packages(packages):
-    if packages:
-        dispatch_map = {
-            'Ubuntu': install_os_packages_apt,
-            'Centos': install_os_packages_yum,
-            'Centos linux': install_os_packages_yum,
-            'Opensuse ': install_os_packages_zypper,
-        }
-        try:
-            dispatch_map[copied_from_ansible.get_distribution()](packages)
-        except KeyError:
-            raise_not_implemented_for_distribution()
+    dispatch_map = {
+        'Ubuntu': install_os_packages_apt,
+        'Centos': install_os_packages_yum,
+        'Centos linux': install_os_packages_yum,
+        'Opensuse ': install_os_packages_zypper,
+    }
+    try:
+        dispatch_map[copied_from_ansible.get_distribution()](packages)
+    except KeyError:
+        raise_not_implemented_for_distribution()
 
 def install_os_packages_from_files_apt(files):
     '''files are installed individually in the order supplied, so inter-file dependencies must be handled by the caller'''
-    subprocess_get_output(['sudo', 'apt-get', 'clean'], check_rc=True)
-    subprocess_get_output(['sudo', 'apt-get', 'update'], check_rc=True)
-    install_os_packages_apt(['gdebi'])
     for f in files:
         subprocess_get_output(['sudo', 'gdebi', '-n', f], check_rc=True)
 
