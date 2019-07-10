@@ -11,11 +11,14 @@ import time
 
 from . import copied_from_ansible
 
+def get_distribution():
+    return copied_from_ansible.get_distribution()
+
 def get_distribution_version_major():
     return copied_from_ansible.get_distribution_version().split('.')[0]
 
 def get_irods_platform_string():
-    return copied_from_ansible.get_distribution() + '_' + get_distribution_version_major()
+    return get_distribution() + '_' + get_distribution_version_major()
 
 def raise_not_implemented_for_distribution():
     raise NotImplementedError, 'not implemented for distribution [{0}]'.format(copied_from_ansible.get_distribution()), sys.exc_info()[2]
@@ -68,7 +71,7 @@ def install_os_packages(packages):
         'Opensuse ': install_os_packages_zypper,
     }
     try:
-        dispatch_map[copied_from_ansible.get_distribution()](packages)
+        dispatch_map[get_distribution()](packages)
     except KeyError:
         raise_not_implemented_for_distribution()
 
@@ -92,7 +95,7 @@ def install_os_packages_from_files(files):
         'Opensuse ': install_os_packages_from_files_zypper,
     }
     try:
-        dispatch_map[copied_from_ansible.get_distribution()](files)
+        dispatch_map[get_distribution()](files)
     except KeyError:
         raise_not_implemented_for_distribution()
 
@@ -116,7 +119,7 @@ def install_irods_core_dev_repository():
         'Opensuse ': install_irods_core_dev_repository_zypper,
     }
     try:
-        dispatch_map[copied_from_ansible.get_distribution()]()
+        dispatch_map[get_distribution()]()
     except KeyError:
         raise_not_implemented_for_distribution()
 
