@@ -81,6 +81,8 @@ def install_os_packages_from_files_apt(files):
         subprocess_get_output(['sudo', 'gdebi', '-n', f], check_rc=True)
 
 def install_os_packages_from_files_yum(files):
+    subprocess_get_output(['sudo', 'rpm', '--rebuilddb'], check_rc=True)
+    subprocess_get_output(['sudo', 'yum', 'update'], check_rc=True)
     args = ['sudo', 'yum', 'localinstall', '-y', '--nogpgcheck'] + list(files)
     subprocess_get_output(args, check_rc=True)
 
