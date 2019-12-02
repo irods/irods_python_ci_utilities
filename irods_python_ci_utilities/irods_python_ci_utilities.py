@@ -37,6 +37,8 @@ def subprocess_get_output(*args, **kwargs):
         del kwargs['data']
     p = subprocess.Popen(*args, **kwargs)
     out, err = p.communicate(data)
+    if out: print(out)
+    if err: print(err)
     if check_rc:
         if p.returncode != 0:
             raise RuntimeError('''subprocess_get_output() failed
