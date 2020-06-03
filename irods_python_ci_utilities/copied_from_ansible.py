@@ -43,8 +43,9 @@ def get_distribution():
                 else:
                     distribution = 'OtherLinux'
         except:
-            # FIXME: MethodMissing, I assume?
-            distribution = platform.dist()[0].capitalize()
+            # For openSUSE platform does not return any information about the distribution
+            import distro
+            distribution = distro.linux_distribution()[0].capitalize()
     else:
         distribution = None
     return distribution
@@ -58,8 +59,9 @@ def get_distribution_version():
             if not distribution_version and os.path.isfile('/etc/system-release'):
                 distribution_version = platform.linux_distribution(supported_dists=['system'])[1]
         except:
-            # FIXME: MethodMissing, I assume?
-            distribution_version = platform.dist()[1]
+            # For openSUSE platform does not return any information about the distribution
+            import distro
+            distribution_version = distro.linux_distribution()[1]
     else:
         distribution_version = None
     return distribution_version
