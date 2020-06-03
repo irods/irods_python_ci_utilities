@@ -55,15 +55,15 @@ stderr: {4}
 
 def install_os_packages_apt(packages):
     args = ['sudo', 'apt-get', 'install', '-y'] + list(packages)
-    subprocess_get_output(args, check_rc=True)
+    return subprocess_get_output(args, check_rc=True)
 
 def install_os_packages_yum(packages):
     args = ['sudo', 'yum', 'install', '-y'] + list(packages)
-    subprocess_get_output(args, check_rc=True)
+    return subprocess_get_output(args, check_rc=True)
 
 def install_os_packages_zypper(packages):
     args = ['sudo', 'zypper', '--non-interactive', 'install'] + list(packages)
-    subprocess_get_output(args, check_rc=True)
+    return subprocess_get_output(args, check_rc=True)
 
 def install_os_packages(packages):
     dispatch_map = {
@@ -71,14 +71,15 @@ def install_os_packages(packages):
         'Centos': install_os_packages_yum,
         'Centos linux': install_os_packages_yum,
         'Opensuse ': install_os_packages_zypper,
+        'Opensuse leap': install_os_packages_zypper,
     }
     try:
-        dispatch_map[get_distribution()](packages)
+        return dispatch_map[get_distribution()](packages)
     except KeyError:
         raise_not_implemented_for_distribution()
 
 def install_os_packages_from_files_apt(files):
-    '''files are installed individually in the order supplied, so inter-file dependencies must be handled by the caller'''
+    # Files are installed individually in the order supplied, so inter-file dependencies must be handled by the caller
     for f in files:
         subprocess_get_output(['sudo', 'gdebi', '-n', f], check_rc=True)
 
@@ -89,7 +90,8 @@ def install_os_packages_from_files_yum(files):
     subprocess_get_output(args, check_rc=True)
 
 def install_os_packages_from_files_zypper(files):
-    install_os_packages_zypper(files)
+    args = ['sudo', 'zypper', '--no-gpg-checks', '--non-interactive', 'install'] + list(files)
+    subprocess_get_output(args, check_rc=True)
 
 def install_os_packages_from_files(files):
     dispatch_map = {
@@ -97,6 +99,7 @@ def install_os_packages_from_files(files):
         'Centos': install_os_packages_from_files_yum,
         'Centos linux': install_os_packages_from_files_yum,
         'Opensuse ': install_os_packages_from_files_zypper,
+        'Opensuse leap': install_os_packages_from_files_zypper,
     }
     try:
         dispatch_map[get_distribution()](files)
@@ -122,6 +125,7 @@ def install_irods_core_dev_repository():
         'Centos': install_irods_core_dev_repository_yum,
         'Centos linux': install_irods_core_dev_repository_yum,
         'Opensuse ': install_irods_core_dev_repository_zypper,
+        'Opensuse leap': install_irods_core_dev_repository_zypper,
     }
     try:
         dispatch_map[get_distribution()]()
@@ -132,12 +136,12 @@ def get_package_suffix():
     d = copied_from_ansible.get_distribution()
     if d in ['Ubuntu']:
         return 'deb'
-    if d in ['Centos', 'Centos linux', 'Opensuse ']:
+    if d in ['Centos', 'Centos linux', 'Opensuse ', 'Opensuse leap']:
         return 'rpm'
     raise_not_implemented_for_distribution()
 
 def get_irods_version():
-    '''Returns irods version as tuple of int's'''
+    # Returns irods version as tuple of int's
     version = get_irods_version_from_json()
     if version:
         return version
@@ -191,7 +195,7 @@ def euid_and_egid_set(name):
         os.setegid(initial_egid)
 
 def git_clone(repository, commitish=None, local_dir=None):
-    '''Returns checkout directory'''
+    # Returns checkout directory
     if local_dir is None:
         local_dir = tempfile.mkdtemp()
     subprocess_get_output(['git', 'clone', '--recursive', repository, local_dir], check_rc=True)
