@@ -384,12 +384,12 @@ def make_symbolic_link_as_root(target, link_name):
 
 def install_irods_dev_and_runtime_packages(irods_packages_root_directory):
     irods_packages_directory = append_os_specific_directory(irods_packages_root_directory)
-    dev_package_basename = filter(lambda x:'irods-dev' in x, os.listdir(irods_packages_directory))[0]
-    dev_package = os.path.join(irods_packages_directory, dev_package_basename)
-    install_os_packages_from_files([dev_package])
     runtime_package_basename = filter(lambda x:'irods-runtime' in x, os.listdir(irods_packages_directory))[0]
     runtime_package = os.path.join(irods_packages_directory, runtime_package_basename)
     install_os_packages_from_files([runtime_package])
+    dev_package_basename = filter(lambda x:'irods-dev' in x, os.listdir(irods_packages_directory))[0]
+    dev_package = os.path.join(irods_packages_directory, dev_package_basename)
+    install_os_packages_from_files([dev_package])
 
 def register_logging_stream_handler(stream, minimum_log_level):
     logging.getLogger().setLevel(minimum_log_level)
