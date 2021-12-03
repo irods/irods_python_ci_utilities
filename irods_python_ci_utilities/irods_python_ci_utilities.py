@@ -81,7 +81,7 @@ def install_os_packages(packages):
 def install_os_packages_from_files_apt(files):
     # Files are installed individually in the order supplied, so inter-file dependencies must be handled by the caller
     for f in files:
-        subprocess_get_output(['sudo', 'gdebi', '-n', f], check_rc=True)
+        subprocess_get_output(['sudo', 'apt', 'install', '-fy', f], check_rc=True)
 
 def install_os_packages_from_files_yum(files):
     subprocess_get_output(['sudo', 'rpm', '--rebuilddb'], check_rc=True)
