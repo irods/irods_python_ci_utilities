@@ -21,10 +21,10 @@ def get_irods_platform_string():
     return get_distribution() + '_' + get_distribution_version_major()
 
 def raise_not_implemented_for_distribution():
-    raise NotImplementedError, 'not implemented for distribution [{0}]'.format(copied_from_ansible.get_distribution()), sys.exc_info()[2]
+    raise NotImplementedError('not implemented for distribution [{0}]'.format(copied_from_ansible.get_distribution()), sys.exc_info()[2])
 
 def raise_not_implemented_for_distribution_major_version():
-    raise NotImplementedError, 'not implemented for distribution [{0}] major version [{1}]'.format(copied_from_ansible.get_distribution(), get_distribution_version_major()), sys.exc_info()[2]
+    raise NotImplementedError('not implemented for distribution [{0}] major version [{1}]'.format(copied_from_ansible.get_distribution(), get_distribution_version_major()), sys.exc_info()[2])
 
 def subprocess_get_output(*args, **kwargs):
     kwargs['stdout'] = subprocess.PIPE
@@ -384,10 +384,10 @@ def make_symbolic_link_as_root(target, link_name):
 
 def install_irods_dev_and_runtime_packages(irods_packages_root_directory):
     irods_packages_directory = append_os_specific_directory(irods_packages_root_directory)
-    runtime_package_basename = filter(lambda x:'irods-runtime' in x, os.listdir(irods_packages_directory))[0]
+    runtime_package_basename = [x for x in os.listdir(irods_packages_directory) if 'irods-runtime' in x][0]
     runtime_package = os.path.join(irods_packages_directory, runtime_package_basename)
     install_os_packages_from_files([runtime_package])
-    dev_package_basename = filter(lambda x:'irods-dev' in x, os.listdir(irods_packages_directory))[0]
+    dev_package_basename = [x for x in os.listdir(irods_packages_directory) if 'irods-dev' in x][0]
     dev_package = os.path.join(irods_packages_directory, dev_package_basename)
     install_os_packages_from_files([dev_package])
 
