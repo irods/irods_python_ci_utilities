@@ -42,14 +42,20 @@ def subprocess_get_output(*args, **kwargs):
     out_b, err_b = p.communicate(data)
 
     if out_b:
-        out = out_b.decode() if isinstance(out_b, bytes) else out_b
-        print(out)
+        out = out_b.decode('utf-8') if isinstance(out_b, bytes) else out_b
+        try:
+            print(out)
+        except UnicodeEncodeError:
+            print(out_b)
     else:
         out = ''
 
     if err_b:
-        err = err_b.decode() if isinstance(err_b, bytes) else err_b
-        print(err)
+        err = err_b.decode('utf-8') if isinstance(err_b, bytes) else err_b
+        try:
+            print(err)
+        except UnicodeEncodeError:
+            print(err_b)
     else:
         err = ''
 
