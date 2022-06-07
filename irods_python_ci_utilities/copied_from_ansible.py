@@ -65,3 +65,11 @@ def get_distribution_version():
     else:
         distribution_version = None
     return distribution_version
+
+
+# irods_python_ci_utilities also has a 'get_distribution', but __init__.py imports this module's globals
+# in their totality and stomps the other module's implementation. The result is that outside calls to
+# irods_python_ci_utilities.get_distribution actually call copied_from_ansible.get_distribution.
+# This should not be the case, so the wildcard import is removed here.
+__all__ = list(globals().keys())
+__all__.remove('get_distribution')

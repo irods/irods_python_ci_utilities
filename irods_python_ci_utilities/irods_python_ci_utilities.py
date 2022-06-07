@@ -11,8 +11,8 @@ import time
 
 from . import copied_from_ansible
 
-def get_distribution():
-    return copied_from_ansible.get_distribution()
+def get_distribution(slash_substitute_character='_'):
+    return copied_from_ansible.get_distribution().replace('/', slash_substitute_character)
 
 def get_distribution_version_major():
     return copied_from_ansible.get_distribution_version().split('.')[0]
@@ -21,10 +21,10 @@ def get_irods_platform_string():
     return get_distribution() + '_' + get_distribution_version_major()
 
 def raise_not_implemented_for_distribution():
-    raise NotImplementedError('not implemented for distribution [{0}]'.format(copied_from_ansible.get_distribution()), sys.exc_info()[2])
+    raise NotImplementedError('not implemented for distribution [{0}]'.format(get_distribution()), sys.exc_info()[2])
 
 def raise_not_implemented_for_distribution_major_version():
-    raise NotImplementedError('not implemented for distribution [{0}] major version [{1}]'.format(copied_from_ansible.get_distribution(), get_distribution_version_major()), sys.exc_info()[2])
+    raise NotImplementedError('not implemented for distribution [{0}] major version [{1}]'.format(get_distribution(), get_distribution_version_major()), sys.exc_info()[2])
 
 def subprocess_get_output(*args, **kwargs):
     kwargs['stdout'] = subprocess.PIPE
@@ -78,6 +78,10 @@ def install_os_packages_yum(packages):
     args = ['sudo', 'yum', 'install', '-y'] + list(packages)
     return subprocess_get_output(args, check_rc=True)
 
+def install_os_packages_dnf(packages):
+    args = ['sudo', 'dnf', 'install', '-y'] + list(packages)
+    return subprocess_get_output(args, check_rc=True)
+
 def install_os_packages_zypper(packages):
     args = ['sudo', 'zypper', '--non-interactive', 'install'] + list(packages)
     return subprocess_get_output(args, check_rc=True)
@@ -85,8 +89,10 @@ def install_os_packages_zypper(packages):
 def install_os_packages(packages):
     dispatch_map = {
         'Ubuntu': install_os_packages_apt,
+        'Debian gnu_linux': install_os_packages_apt,
         'Centos': install_os_packages_yum,
         'Centos linux': install_os_packages_yum,
+        'Almalinux': install_os_packages_dnf,
         'Opensuse ': install_os_packages_zypper,
         'Opensuse leap': install_os_packages_zypper,
     }
@@ -99,6 +105,11 @@ def install_os_packages_from_files_apt(files):
     # Files are installed individually in the order supplied, so inter-file dependencies must be handled by the caller
     for f in files:
         subprocess_get_output(['sudo', 'apt', 'install', '-fy', f], check_rc=True)
+
+def install_os_packages_from_files_dnf(files):
+    subprocess_get_output(['sudo', 'dnf', 'update', '-y'], check_rc=True)
+    args = ['sudo', 'dnf', 'localinstall', '-y', '--nogpgcheck'] + list(files)
+    subprocess_get_output(args, check_rc=True)
 
 def install_os_packages_from_files_yum(files):
     subprocess_get_output(['sudo', 'rpm', '--rebuilddb'], check_rc=True)
@@ -113,8 +124,10 @@ def install_os_packages_from_files_zypper(files):
 def install_os_packages_from_files(files):
     dispatch_map = {
         'Ubuntu': install_os_packages_from_files_apt,
+        'Debian gnu_linux': install_os_packages_from_files_apt,
         'Centos': install_os_packages_from_files_yum,
         'Centos linux': install_os_packages_from_files_yum,
+        'Almalinux': install_os_packages_from_files_dnf,
         'Opensuse ': install_os_packages_from_files_zypper,
         'Opensuse leap': install_os_packages_from_files_zypper,
     }
@@ -139,8 +152,10 @@ def install_irods_core_dev_repository_zypper():
 def install_irods_core_dev_repository():
     dispatch_map = {
         'Ubuntu': install_irods_core_dev_repository_apt,
+        'Debian gnu_linux': install_irods_core_dev_repository_apt,
         'Centos': install_irods_core_dev_repository_yum,
         'Centos linux': install_irods_core_dev_repository_yum,
+        'Almalinux': install_irods_core_dev_repository_yum,
         'Opensuse ': install_irods_core_dev_repository_zypper,
         'Opensuse leap': install_irods_core_dev_repository_zypper,
     }
@@ -150,10 +165,10 @@ def install_irods_core_dev_repository():
         raise_not_implemented_for_distribution()
 
 def get_package_suffix():
-    d = copied_from_ansible.get_distribution()
-    if d in ['Ubuntu']:
+    d = get_distribution()
+    if d in ['Ubuntu', 'Debian gnu_linux']:
         return 'deb'
-    if d in ['Centos', 'Centos linux', 'Opensuse ', 'Opensuse leap']:
+    if d in ['Centos', 'Centos linux', 'Opensuse ', 'Opensuse leap', 'Almalinux']:
         return 'rpm'
     raise_not_implemented_for_distribution()
 
@@ -224,12 +239,14 @@ def git_clone(repository, commitish=None, local_dir=None):
 def install_database(database_type):
     dispatch_map = {
         'Ubuntu': install_database_debian,
+        'Debian gnu_linux': install_database_debian,
         'Centos': install_database_redhat,
         'Centos linux': install_database_redhat,
+        'Almalinux': install_database_redhat,
         'Opensuse ': install_database_suse,
     }
     try:
-        dispatch_map[copied_from_ansible.get_distribution()](database_type)
+        dispatch_map[get_distribution()](database_type)
     except KeyError:
         raise_not_implemented_for_distribution()
 
@@ -336,22 +353,22 @@ def install_database_suse(database_type):
         raise NotImplementedError('install_database_suse not implemented for database type [{0}]'.format(database_type))
 
 def get_mysql_pcre_build_dependencies():
-    distribution = copied_from_ansible.get_distribution()
-    if distribution == 'Ubuntu':
+    distribution = get_distribution()
+    if distribution in ['Ubuntu', 'Debian gnu_linux']:
         return ['libpcre3-dev', 'libmysqlclient-dev', 'build-essential', 'libtool', 'autoconf', 'git']
-    if distribution in ['Centos', 'Centos linux']:
+    if distribution in ['Centos', 'Centos linux', 'Almalinux']:
         return ['pcre-devel', 'gcc', 'make', 'automake', 'mysql-devel', 'autoconf', 'git']
     if distribution == 'Opensuse ':
         return ['libmysqlclient-devel', 'autoconf', 'git']
     raise_not_implemented_for_distribution()
 
 def get_mysql_service_name():
-    distribution = copied_from_ansible.get_distribution()
-    if distribution == 'Ubuntu':
+    distribution = get_distribution()
+    if distribution in ['Ubuntu', 'Debian gnu_linux']:
         return 'mysql'
     if distribution == 'Centos':
         return 'mysqld'
-    if distribution == 'Centos linux':
+    if distribution in ['Centos linux', 'Almalinux']:
         return 'mariadb'
     if distribution == 'Opensuse ':
         return 'mysql'
