@@ -103,9 +103,9 @@ def install_os_packages(packages):
         raise_not_implemented_for_distribution()
 
 def install_os_packages_from_files_apt(files):
-    # Files are installed individually in the order supplied, so inter-file dependencies must be handled by the caller
-    for f in files:
-        subprocess_get_output(['sudo', 'apt', 'install', '-fy', f], check_rc=True)
+    args = ['sudo', 'apt', 'install', '-fy'] + list(files)
+    if len(files) > 0:
+        subprocess_get_output(args, check_rc=True)
 
 def install_os_packages_from_files_dnf(files):
     subprocess_get_output(['sudo', 'dnf', 'update', '-y'], check_rc=True)
