@@ -93,6 +93,7 @@ def install_os_packages(packages):
         'Centos': install_os_packages_yum,
         'Centos linux': install_os_packages_yum,
         'Almalinux': install_os_packages_dnf,
+        'Rocky linux': install_os_packages_dnf,
         'Opensuse ': install_os_packages_zypper,
         'Opensuse leap': install_os_packages_zypper,
     }
@@ -128,6 +129,7 @@ def install_os_packages_from_files(files):
         'Centos': install_os_packages_from_files_yum,
         'Centos linux': install_os_packages_from_files_yum,
         'Almalinux': install_os_packages_from_files_dnf,
+        'Rocky linux': install_os_packages_from_files_dnf,
         'Opensuse ': install_os_packages_from_files_zypper,
         'Opensuse leap': install_os_packages_from_files_zypper,
     }
@@ -156,6 +158,7 @@ def install_irods_core_dev_repository():
         'Centos': install_irods_core_dev_repository_yum,
         'Centos linux': install_irods_core_dev_repository_yum,
         'Almalinux': install_irods_core_dev_repository_yum,
+        'Rocky linux': install_irods_core_dev_repository_yum,
         'Opensuse ': install_irods_core_dev_repository_zypper,
         'Opensuse leap': install_irods_core_dev_repository_zypper,
     }
@@ -168,7 +171,7 @@ def get_package_suffix():
     d = get_distribution()
     if d in ['Ubuntu', 'Debian gnu_linux']:
         return 'deb'
-    if d in ['Centos', 'Centos linux', 'Opensuse ', 'Opensuse leap', 'Almalinux']:
+    if d in ['Centos', 'Centos linux', 'Opensuse ', 'Opensuse leap', 'Almalinux', 'Rocky linux']:
         return 'rpm'
     raise_not_implemented_for_distribution()
 
@@ -243,6 +246,7 @@ def install_database(database_type):
         'Centos': install_database_redhat,
         'Centos linux': install_database_redhat,
         'Almalinux': install_database_redhat,
+        'Rocky linux': install_database_redhat,
         'Opensuse ': install_database_suse,
     }
     try:
@@ -356,7 +360,7 @@ def get_mysql_pcre_build_dependencies():
     distribution = get_distribution()
     if distribution in ['Ubuntu', 'Debian gnu_linux']:
         return ['libpcre3-dev', 'libmysqlclient-dev', 'build-essential', 'libtool', 'autoconf', 'git']
-    if distribution in ['Centos', 'Centos linux', 'Almalinux']:
+    if distribution in ['Centos', 'Centos linux', 'Almalinux', 'Rocky linux']:
         return ['pcre-devel', 'gcc', 'make', 'automake', 'mysql-devel', 'autoconf', 'git']
     if distribution == 'Opensuse ':
         return ['libmysqlclient-devel', 'autoconf', 'git']
@@ -368,7 +372,7 @@ def get_mysql_service_name():
         return 'mysql'
     if distribution == 'Centos':
         return 'mysqld'
-    if distribution in ['Centos linux', 'Almalinux']:
+    if distribution in ['Centos linux', 'Almalinux', 'Rocky linux']:
         return 'mariadb'
     if distribution == 'Opensuse ':
         return 'mysql'
