@@ -71,6 +71,7 @@ stderr: {4}
     return p.returncode, out, err
 
 def install_os_packages_apt(packages):
+    subprocess_get_output(['sudo', 'apt-get', 'update'], check_rc=True)
     args = ['sudo', 'apt-get', 'install', '-y'] + list(packages)
     return subprocess_get_output(args, check_rc=True)
 
@@ -104,6 +105,7 @@ def install_os_packages(packages):
 
 def install_os_packages_from_files_apt(files):
     if len(files) > 0:
+        subprocess_get_output(['sudo', 'apt-get', 'update'], check_rc=True)
         # If several package files are present, they should be installed simultaneously, ie.
         # within the same command, so that possible dependencies between them are recognized.
         args = ['sudo', 'apt', 'install', '-fy'] + list(files)
@@ -143,7 +145,6 @@ def install_os_packages_from_files(files):
 def install_irods_core_dev_repository_apt():
     subprocess_get_output('wget -qO - https://core-dev.irods.org/irods-core-dev-signing-key.asc | sudo apt-key add -', shell=True, check_rc=True)
     subprocess_get_output('echo "deb [arch=amd64] https://core-dev.irods.org/apt/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/renci-irods-core-dev.list', shell=True, check_rc=True)
-    subprocess_get_output(['sudo', 'apt-get', 'update'], check_rc=True)
 
 def install_irods_core_dev_repository_yum():
     subprocess_get_output(['sudo', 'rpm', '--import', 'https://core-dev.irods.org/irods-core-dev-signing-key.asc'], check_rc=True)
