@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.request
 
 from . import copied_from_ansible
 
@@ -143,8 +144,22 @@ def install_os_packages_from_files(files):
         raise_not_implemented_for_distribution()
 
 def install_irods_core_dev_repository_apt():
-    subprocess_get_output('wget -qO - https://core-dev.irods.org/irods-core-dev-signing-key.asc | sudo apt-key add -', shell=True, check_rc=True)
-    subprocess_get_output('echo "deb [arch=amd64] https://core-dev.irods.org/apt/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/renci-irods-core-dev.list', shell=True, check_rc=True)
+    install_os_packages_apt(['ca-certificates', 'gnupg', 'lsb-release'])
+    gpg_cmd = [
+        'sudo',
+        'gpg',
+        '--no-options',
+        '--no-default-keyring',
+        '--no-auto-check-trustdb',
+        '--homedir', '/dev/null',
+        '--no-keyring',
+        '--import-options', 'import-export',
+        '--output', '/etc/apt/keyrings/renci-irods-core-dev-archive-keyring.pgp',
+        '--import',
+    ]
+    with urllib.request.urlopen('https://core-dev.irods.org/irods-core-dev-signing-key.asc') as gpg_keys:
+        subprocess_get_output(gpg_cmd, data=gpg_keys.read(), check_rc=True)
+    subprocess_get_output('echo "deb [signed-by=/etc/apt/keyrings/renci-irods-core-dev-archive-keyring.pgp arch=amd64] https://core-dev.irods.org/apt/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/renci-irods-core-dev.list', shell=True, check_rc=True)
 
 def install_irods_core_dev_repository_yum():
     subprocess_get_output(['sudo', 'rpm', '--import', 'https://core-dev.irods.org/irods-core-dev-signing-key.asc'], check_rc=True)
