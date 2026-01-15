@@ -113,7 +113,6 @@ def install_os_packages_from_files_apt(files):
         subprocess_get_output(args, check_rc=True)
 
 def install_os_packages_from_files_dnf(files):
-    subprocess_get_output(['sudo', 'dnf', 'update', '-y'], check_rc=True)
     args = ['sudo', 'dnf', 'localinstall', '-y', '--nogpgcheck'] + list(files)
     subprocess_get_output(args, check_rc=True)
 
