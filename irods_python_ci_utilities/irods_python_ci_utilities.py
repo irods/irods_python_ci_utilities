@@ -446,6 +446,28 @@ def install_irods_dev_and_runtime_packages(irods_packages_root_directory):
     dev_package = os.path.join(irods_packages_directory, dev_package_basename)
     install_os_packages_from_files([dev_package])
 
+def install_released_irods_dev_and_runtime_packages(irods_package_version):
+    # Install the latest version.
+    if irods_package_version is None:
+        install_os_packages([
+            'irods-runtime',
+            'irods-dev' if get_distribution() in ['Ubuntu', 'Debian gnu_linux'] else 'irods-devel'
+        ])
+        return
+
+    # Install the specified version.
+    dev_package_name = 'irods-devel'
+    delimiter = '-'
+    if get_distribution() in ['Ubuntu', 'Debian gnu_linux']:
+        dev_package_name = 'irods-dev'
+        delimiter = '='
+
+    version_suffix = f'{delimiter}{irods_package_version}'
+    install_os_packages([
+        f'irods-runtime{version_suffix}',
+        f'{dev_package_name}{version_suffix}'
+    ])
+
 def register_logging_stream_handler(stream, minimum_log_level):
     logging.getLogger().setLevel(minimum_log_level)
     logging_handler = logging.StreamHandler(stream)
