@@ -9,6 +9,7 @@ import sys
 import tempfile
 import time
 import urllib.request
+from pathlib import Path
 
 from . import copied_from_ansible
 
@@ -162,6 +163,10 @@ def install_irods_packages_repository_apt():
 
 def install_irods_core_dev_repository_apt():
     install_os_packages_apt(['ca-certificates', 'gnupg', 'lsb-release'])
+
+    # Ensure directory exists for the following gpg command
+    Path('/etc/apt/keyrings').mkdir(parents=True, exist_ok=True)
+
     gpg_cmd = [
         'sudo',
         'gpg',
